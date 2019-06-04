@@ -6,6 +6,8 @@ import XCTest
 
 let url_1 = "test-example.html"
 let url_2 = ["url": "test-mozilla-org.html", "bookmarkLabel": "Internet for people, not profit — Mozilla"]
+let url_3 = "https://wikipedia.org"
+let url_4 = "https://wikimedia.org"
 
 class BookmarkingTests: BaseTestCase {
     private func bookmark() {
@@ -96,6 +98,38 @@ class BookmarkingTests: BaseTestCase {
         //There should be a bookmark
         navigator.goto(MobileBookmarks)
         checkItemInBookmarkList()
+    }
+    
+    func testRecentBookmarks() {
+        // Verify that there are only 4 cells without recent bookmarks
+        navigator.goto(LibraryPanel_Bookmarks)
+        XCTAssertEqual(app.tables["Bookmarks List"].cells.count, 4)
+        
+        //Add a bookmark
+        navigator.openURL(url_3)
+        waitForTabsButton()
+        bookmark()
+        
+        // Check if it shows in recent bookmarks
+        navigator.goto(LibraryPanel_Bookmarks)
+        waitForExistence(app.otherElements["Recent Bookmarks"])
+        waitForExistence(app.staticTexts["Wikipedia"])
+        XCTAssertEqual(app.tables["Bookmarks List"].cells.count, 5)
+        
+        // Add another
+        navigator.openURL(url_4)
+        waitForTabsButton()
+        bookmark()
+        
+        // Check if it shows in recent bookmarks
+        navigator.goto(LibraryPanel_Bookmarks)
+        waitForExistence(app.otherElements["Recent Bookmarks"])
+        waitForExistence(app.staticTexts["Wikimedia"])
+        XCTAssertEqual(app.tables["Bookmarks List"].cells.count, 6)
+        
+        // Click a recent bookmark and make sure it navigates
+        app.tables["Bookmarks List"].cells.element(boundBy: 5).tap()
+        //TO-DO: Add check to see whether it is the right webpage after tapping
     }
 
     // Smoketest
